@@ -1,0 +1,10 @@
+{
+  "p-student-1": {
+    "top1_sku": "SKU-STU-1",
+    "top3_skus": ["SKU-STU-1", "SKU-STU-2", "SKU-STU-3"]
+  },
+  "p-gamer-1": {
+    "top1_sku": "SKU-GAM-1",
+    "top3_skus": ["SKU-GAM-1", "SKU-GAM-2", "SKU-GAM-3"]
+  }
+}

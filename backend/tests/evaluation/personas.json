@@ -1,0 +1,20 @@
+[
+  {
+    "id": "p-student-1",
+    "name": "Rohan - College Student",
+    "segment": "Students",
+    "budget_inr": 60000,
+    "use_case": "college study and coding",
+    "min_ram_gb": 8,
+    "prefers_lightweight": true
+  },
+  {
+    "id": "p-gamer-1",
+    "name": "Ananya - Esports Gamer",
+    "segment": "Gamers",
+    "budget_inr": 120000,
+    "use_case": "competitive gaming",
+    "min_ram_gb": 16,
+    "requires_dedicated_gpu": true
+  }
+]

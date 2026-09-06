@@ -1,0 +1,27 @@
+{
+  "name": "lapiq-frontend",
+  "version": "3.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "16.2.10",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "motion": "12.42.0",
+    "lucide-react": "1.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.0",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "typescript": "5.3.3",
+    "eslint": "9.0.0",
+    "eslint-config-next": "16.2.10"
+  }
+}
