@@ -1,10 +1,9 @@
 """CSV Seeder script to parse laptop.csv and populate the PostgreSQL catalog."""
 
+import asyncio
 import csv
 import re
-import asyncio
-from typing import Optional, Tuple
-from sqlalchemy import select
+
 from lapiq.infrastructure.database.models import CPU, GPU, Display, Laptop, Variant
 from lapiq.infrastructure.database.session import async_session_factory
 
@@ -12,11 +11,26 @@ from lapiq.infrastructure.database.session import async_session_factory
 # Benchmark estimate helpers for CPUs and GPUs
 def estimate_cpu_benchmark(cpu_model: str, core_count: int) -> int:
     model_upper = cpu_model.upper()
-    if "I9" in model_upper or "RYZEN 9" in model_upper or "M3 MAX" in model_upper or "M3 PRO" in model_upper:
+    if (
+        "I9" in model_upper
+        or "RYZEN 9" in model_upper
+        or "M3 MAX" in model_upper
+        or "M3 PRO" in model_upper
+    ):
         return 28000
-    if "I7" in model_upper or "RYZEN 7" in model_upper or "M2 PRO" in model_upper or "M3" in model_upper:
+    if (
+        "I7" in model_upper
+        or "RYZEN 7" in model_upper
+        or "M2 PRO" in model_upper
+        or "M3" in model_upper
+    ):
         return 22000
-    if "I5" in model_upper or "RYZEN 5" in model_upper or "M1" in model_upper or "M2" in model_upper:
+    if (
+        "I5" in model_upper
+        or "RYZEN 5" in model_upper
+        or "M1" in model_upper
+        or "M2" in model_upper
+    ):
         return 16000
     if "I3" in model_upper or "RYZEN 3" in model_upper:
         return 10000
@@ -27,16 +41,16 @@ def estimate_gpu_benchmark(gpu_model: str, is_integrated: bool) -> int:
     if is_integrated:
         return 4500
     model_upper = gpu_model.upper()
-    if "4090" in model_upper or "4080" in model_upper:
-        return 24000
-    if "4070" in model_upper or "3080" in model_upper:
-        return 20000
-    if "4060" in model_upper or "3070" in model_upper:
-        return 17000
-    if "4050" in model_upper or "3050" in model_upper or "6500M" in model_upper:
-        return 13000
-    if "2050" in model_upper or "1650" in model_upper:
-        return 9000
+    gpu_tiers = (
+        (("4090", "4080"), 24000),
+        (("4070", "3080"), 20000),
+        (("4060", "3070"), 17000),
+        (("4050", "3050", "6500M"), 13000),
+        (("2050", "1650"), 9000),
+    )
+    for keywords, score in gpu_tiers:
+        if any(kw in model_upper for kw in keywords):
+            return score
     return 7000
 
 
@@ -58,7 +72,7 @@ def parse_storage(storage_str: str) -> int:
     return int(match_gb.group(1)) if match_gb else 512
 
 
-def parse_display(display_str: str) -> Tuple[float, str, bool]:
+def parse_display(display_str: str) -> tuple[float, str, bool]:
     size = 15.6
     size_match = re.search(r"(\d+(?:\.\d+)?)\s*inch", display_str, re.IGNORECASE)
     if size_match:
@@ -73,7 +87,7 @@ def parse_display(display_str: str) -> Tuple[float, str, bool]:
     return size, res, is_touch
 
 
-def parse_core_threads(core_str: str) -> Tuple[int, int]:
+def parse_core_threads(core_str: str) -> tuple[int, int]:
     cores = 4
     threads = 8
     core_match = re.search(r"(\d+)\s*Core", core_str, re.IGNORECASE)
@@ -94,7 +108,7 @@ def parse_core_threads(core_str: str) -> Tuple[int, int]:
     return cores, threads
 
 
-def parse_brand_model(model_str: str) -> Tuple[str, str, str]:
+def parse_brand_model(model_str: str) -> tuple[str, str, str]:
     parts = model_str.split()
     brand = parts[0] if parts else "Laptop"
     model_name = " ".join(parts[1:5]) if len(parts) > 1 else model_str
@@ -105,9 +119,21 @@ def parse_brand_model(model_str: str) -> Tuple[str, str, str]:
 def determine_segment(name: str, price: int, gpu_name: str) -> str:
     name_upper = name.upper()
     gpu_upper = gpu_name.upper()
-    if "GAMING" in name_upper or "RTX" in gpu_upper or "RX" in gpu_upper or "TUF" in name_upper or "LOQ" in name_upper or "VICTUS" in name_upper:
+    if (
+        "GAMING" in name_upper
+        or "RTX" in gpu_upper
+        or "RX" in gpu_upper
+        or "TUF" in name_upper
+        or "LOQ" in name_upper
+        or "VICTUS" in name_upper
+    ):
         return "Gamers"
-    if "CREATOR" in name_upper or "PRO" in name_upper or "STUDIO" in name_upper or "SLIM 7" in name_upper:
+    if (
+        "CREATOR" in name_upper
+        or "PRO" in name_upper
+        or "STUDIO" in name_upper
+        or "SLIM 7" in name_upper
+    ):
         return "Creators"
     if price < 50000:
         return "Students"
@@ -118,7 +144,7 @@ async def seed_from_csv(csv_filepath: str) -> None:
     """Parse Indian laptops CSV and seed database."""
     async with async_session_factory() as session:
         count = 0
-        with open(csv_filepath, mode="r", encoding="utf-8") as f:
+        with open(csv_filepath, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 model_raw = row.get("Model", "")
@@ -129,7 +155,6 @@ async def seed_from_csv(csv_filepath: str) -> None:
                 ssd_raw = row.get("SSD", "")
                 disp_raw = row.get("Display", "")
                 gfx_raw = row.get("Graphics", "")
-                os_raw = row.get("OS", "Windows 11 OS")
 
                 if not model_raw or not price_raw:
                     continue
@@ -143,7 +168,18 @@ async def seed_from_csv(csv_filepath: str) -> None:
                 segment = determine_segment(model_raw, price, gfx_raw)
 
                 # 1. CPU
-                cpu_brand = "AMD" if "AMD" in gen_raw or "Ryzen" in gen_raw else ("Apple" if "Apple" in gen_raw or "M1" in gen_raw or "M2" in gen_raw or "M3" in gen_raw else "Intel")
+                cpu_brand = (
+                    "AMD"
+                    if "AMD" in gen_raw or "Ryzen" in gen_raw
+                    else (
+                        "Apple"
+                        if "Apple" in gen_raw
+                        or "M1" in gen_raw
+                        or "M2" in gen_raw
+                        or "M3" in gen_raw
+                        else "Intel"
+                    )
+                )
                 cpu_model = gen_raw if gen_raw else "Core Processor"
                 cpu_bench = estimate_cpu_benchmark(cpu_model, core_count)
 
@@ -160,8 +196,22 @@ async def seed_from_csv(csv_filepath: str) -> None:
                 await session.flush()
 
                 # 2. GPU
-                is_integrated = "INTEGRATED" in gfx_raw.upper() or "UHD" in gfx_raw.upper() or "IRIS" in gfx_raw.upper() or "RADEON GRAPHICS" in gfx_raw.upper() or "APPLE" in gfx_raw.upper()
-                gpu_brand = "NVIDIA" if "NVIDIA" in gfx_raw.upper() or "GeForce" in gfx_raw.upper() else ("AMD" if "RADEON" in gfx_raw.upper() or "RX" in gfx_raw.upper() else ("Apple" if "APPLE" in gfx_raw.upper() else "Intel"))
+                is_integrated = (
+                    "INTEGRATED" in gfx_raw.upper()
+                    or "UHD" in gfx_raw.upper()
+                    or "IRIS" in gfx_raw.upper()
+                    or "RADEON GRAPHICS" in gfx_raw.upper()
+                    or "APPLE" in gfx_raw.upper()
+                )
+                gpu_brand = (
+                    "NVIDIA"
+                    if "NVIDIA" in gfx_raw.upper() or "GeForce" in gfx_raw.upper()
+                    else (
+                        "AMD"
+                        if "RADEON" in gfx_raw.upper() or "RX" in gfx_raw.upper()
+                        else ("Apple" if "APPLE" in gfx_raw.upper() else "Intel")
+                    )
+                )
                 gpu_vram = 0
                 vram_match = re.search(r"(\d+)\s*GB", gfx_raw, re.IGNORECASE)
                 if vram_match and not is_integrated:
@@ -203,7 +253,7 @@ async def seed_from_csv(csv_filepath: str) -> None:
                 await session.flush()
 
                 # 5. Variant SKU
-                sku = f"SKU-{count+1:04d}-{brand[:3].upper()}-{ram_gb}GB"
+                sku = f"SKU-{count + 1:04d}-{brand[:3].upper()}-{ram_gb}GB"
 
                 variant = Variant(
                     laptop_id=laptop.id,
@@ -213,7 +263,9 @@ async def seed_from_csv(csv_filepath: str) -> None:
                     display_id=disp.id,
                     ram_gb=ram_gb,
                     storage_gb=storage_gb,
-                    weight_kg=1.5 if "Air" in model_raw or "Slim" in model_raw else (2.3 if segment == "Gamers" else 1.8),
+                    weight_kg=1.5
+                    if "Air" in model_raw or "Slim" in model_raw
+                    else (2.3 if segment == "Gamers" else 1.8),
                     os_type="macOS" if "Mac" in model_raw or "Apple" in brand else "Windows 11",
                     current_price_inr=price,
                     is_in_stock=True,
@@ -231,6 +283,7 @@ async def seed_from_csv(csv_filepath: str) -> None:
 
 if __name__ == "__main__":
     from pathlib import Path
+
     data_in_container = Path("/app/data/knowledge_base.csv")
     data_local = Path(__file__).resolve().parents[4] / "data" / "knowledge_base.csv"
     root_laptop_csv = Path(__file__).resolve().parents[4] / "laptop.csv"

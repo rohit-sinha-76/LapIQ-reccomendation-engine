@@ -1,6 +1,7 @@
 """Unit tests for domain interfaces and RedisCacheManager instantiation."""
 
 import pytest
+
 from lapiq.domain.interfaces import (
     CatalogProviderInterface,
     LaptopRepositoryInterface,

@@ -1,7 +1,7 @@
 """Background worker jobs for data sync and cache invalidation."""
 
 import logging
-from typing import Optional
+
 from lapiq.infrastructure.cache.redis_cache import RedisCacheManager
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ async def sync_catalog_job() -> int:
     return 0
 
 
-async def sync_prices_job(cache_manager: Optional[RedisCacheManager] = None) -> int:
+async def sync_prices_job(cache_manager: RedisCacheManager | None = None) -> int:
     """
     Offline Pipeline Step 5 & 13: Fetch price updates and invalidate Redis retrieval cache.
 
@@ -28,7 +28,9 @@ async def sync_prices_job(cache_manager: Optional[RedisCacheManager] = None) -> 
     if cache_manager:
         # Invalidate retrieval and price caches on price update per Rule 8 & Invalidation Strategy
         invalidated_count = await cache_manager.invalidate("retrieval:*")
-        logger.info(f"Invalidated {invalidated_count} retrieval cache entries following price sync.")
+        logger.info(
+            f"Invalidated {invalidated_count} retrieval cache entries following price sync."
+        )
     return 0
 
 

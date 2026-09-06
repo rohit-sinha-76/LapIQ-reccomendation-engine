@@ -1,6 +1,7 @@
 """FastAPI v1 recommendation endpoints — POST /recommend and GET /recommend/{id}/stream."""
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -188,7 +189,7 @@ async def stream_explanation(
     """
     orchestrator = _build_orchestrator(session)
 
-    async def event_generator() -> AsyncGenerator[str, None]:
+    async def event_generator() -> AsyncGenerator[str]:
         async for chunk in orchestrator.stream_for_request_id(request_id):
             yield _sse_event(chunk)
         yield _sse_event("[DONE]")

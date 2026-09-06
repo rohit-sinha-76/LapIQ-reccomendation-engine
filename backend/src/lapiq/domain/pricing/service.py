@@ -1,6 +1,5 @@
 """Pricing Module domain service managing laptop price evaluations and stats."""
 
-from typing import Optional
 from lapiq.domain.interfaces.repository import PriceRepositoryInterface, VariantRepositoryInterface
 from lapiq.infrastructure.cache.redis_cache import RedisCacheManager
 
@@ -12,7 +11,7 @@ class PricingService:
         self,
         price_repo: PriceRepositoryInterface,
         variant_repo: VariantRepositoryInterface,
-        cache_manager: Optional[RedisCacheManager] = None,
+        cache_manager: RedisCacheManager | None = None,
     ) -> None:
         self.price_repo = price_repo
         self.variant_repo = variant_repo

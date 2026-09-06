@@ -1,6 +1,7 @@
 """Unit tests for Evidence Module, Explanation Builder, and ReasoningProvider."""
 
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
 from lapiq.domain.evidence.aggregator import EvidenceAggregator
@@ -11,10 +12,10 @@ from lapiq.domain.recommendation.models import (
     UserPreferences,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_variant_mock(laptop_id: int = 1, price: int = 55000, ram_gb: int = 16) -> MagicMock:
     laptop = MagicMock()
@@ -56,6 +57,7 @@ def _make_result(prefs: UserPreferences) -> RecommendationResult:
 # Evidence Module Tests
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_evidence_aggregator_returns_normalized_items() -> None:
     """EvidenceAggregator must normalize raw repository data to expected keys."""
@@ -93,11 +95,14 @@ async def test_evidence_aggregator_respects_max_items() -> None:
 # Explanation Builder Tests
 # ---------------------------------------------------------------------------
 
+
 def test_explanation_builder_produces_non_empty_context() -> None:
     """ExplanationBuilder.build must produce a non-empty summary text."""
     prefs = _make_prefs()
     result = _make_result(prefs)
-    evidence_map = {1: [{"source_type": "review", "summary": "Solid performance.", "sentiment": "0.8"}]}
+    evidence_map = {
+        1: [{"source_type": "review", "summary": "Solid performance.", "sentiment": "0.8"}]
+    }
 
     builder = ExplanationBuilder()
     context = builder.build(result, evidence_map)

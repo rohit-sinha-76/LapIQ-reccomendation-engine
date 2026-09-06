@@ -1,7 +1,9 @@
 """Async database session factory and lifecycle management using SQLAlchemy 2.x."""
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from lapiq.core.config import settings
 
 engine = create_async_engine(
@@ -18,7 +20,7 @@ async_session_factory = async_sessionmaker(
 )
 
 
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_async_session() -> AsyncGenerator[AsyncSession]:
     """Dependency injector yield for FastAPI async database session."""
     async with async_session_factory() as session:
         yield session

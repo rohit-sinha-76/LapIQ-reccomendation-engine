@@ -1,7 +1,8 @@
 """Hybrid Retriever — combines pgvector cosine similarity with SQL budget & segment filtering."""
 
 import logging
-from typing import Sequence
+from collections.abc import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload

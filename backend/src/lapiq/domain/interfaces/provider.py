@@ -1,7 +1,7 @@
 """Abstract base classes defining external provider interfaces for LapIQ."""
 
 from abc import ABC, abstractmethod
-from typing import AsyncIterator, Sequence
+from collections.abc import AsyncIterator, Sequence
 
 
 class CatalogProviderInterface(ABC):

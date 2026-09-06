@@ -1,7 +1,6 @@
 """Recommendation Inspector — provides deterministic scoring breakdowns and selection rationale."""
 
 from dataclasses import dataclass
-from typing import Sequence
 
 from lapiq.domain.recommendation.models import ScoredVariant, UserPreferences
 
@@ -24,7 +23,7 @@ class ScoringBreakdown:
 class RecommendationInspector:
     """
     Inspects scored candidates to generate deterministic selection rationale.
-    
+
     Explains on every recommendation why a laptop won (reason_selected) and
     why other candidates lost (reason_others_lost). Pure deterministic domain logic.
     """
@@ -63,9 +62,6 @@ class RecommendationInspector:
         budget_fit = round(max(0.0, 1.0 - max(0.0, budget_diff)), 4)
 
         # Generate reason_selected
-        brand = v.laptop.brand if v.laptop else "Laptop"
-        model = v.laptop.model_name if v.laptop else f"SKU {v.sku}"
-        
         if rank == 1:
             reason_selected = (
                 f"Top pick for {preferences.target_segment} segment: highest combined performance "

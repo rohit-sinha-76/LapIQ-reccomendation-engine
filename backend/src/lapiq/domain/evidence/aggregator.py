@@ -1,6 +1,5 @@
 """Evidence domain module — structured evidence aggregation from review sources."""
 
-from typing import Optional, Sequence
 from lapiq.domain.interfaces.repository import EvidenceRepositoryInterface
 
 
@@ -29,10 +28,12 @@ class EvidenceAggregator:
         normalized: list[dict[str, str]] = []
 
         for item in items[:max_items]:
-            normalized.append({
-                "source_type": item.get("source_type", "review"),
-                "summary": item.get("summary_text", ""),
-                "sentiment": str(item.get("sentiment_score", "0.0")),
-            })
+            normalized.append(
+                {
+                    "source_type": item.get("source_type", "review"),
+                    "summary": item.get("summary_text", ""),
+                    "sentiment": str(item.get("sentiment_score", "0.0")),
+                }
+            )
 
         return normalized

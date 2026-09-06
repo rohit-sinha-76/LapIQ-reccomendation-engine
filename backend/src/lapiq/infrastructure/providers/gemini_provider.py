@@ -6,7 +6,7 @@ Direct SDK calls outside this file violate architecture invariant 4.
 """
 
 import logging
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from google import genai
 

@@ -25,7 +25,6 @@ class RecommendationPolicy:
         """Select top-N eligible candidates from a pre-sorted scored list."""
         capped_top_n = min(top_n, MAX_TOP_N)
         eligible = [
-            sv for sv in scored_variants
-            if sv.confidence_score >= MIN_CONFIDENCE_TO_INCLUDE
+            sv for sv in scored_variants if sv.confidence_score >= MIN_CONFIDENCE_TO_INCLUDE
         ]
         return eligible[:capped_top_n]

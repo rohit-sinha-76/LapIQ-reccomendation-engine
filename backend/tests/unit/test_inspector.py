@@ -1,7 +1,6 @@
 """Unit tests for RecommendationInspector."""
 
 from unittest.mock import MagicMock
-import pytest
 
 from lapiq.domain.recommendation.models import ScoredVariant, UserPreferences
 from lapiq.domain.scoring.inspector import RecommendationInspector, ScoringBreakdown

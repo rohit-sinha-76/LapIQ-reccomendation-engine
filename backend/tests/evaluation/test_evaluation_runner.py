@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
 from lapiq.application.evaluation.runner import EvaluationRunner
@@ -20,9 +21,9 @@ def _make_scored(sku: str, score: float = 0.85) -> ScoredVariant:
 async def test_evaluation_runner_calculates_top1_and_top3_accuracy() -> None:
     """EvaluationRunner must run personas and compute accurate Top-1 and Top-3 metrics."""
     eval_dir = Path(__file__).parent
-    with open(eval_dir / "personas.json", "r", encoding="utf-8") as f:
+    with open(eval_dir / "personas.json", encoding="utf-8") as f:
         personas = json.load(f)
-    with open(eval_dir / "expected_results.json", "r", encoding="utf-8") as f:
+    with open(eval_dir / "expected_results.json", encoding="utf-8") as f:
         expected = json.load(f)
 
     mock_engine = AsyncMock(spec=RecommendationEngine)

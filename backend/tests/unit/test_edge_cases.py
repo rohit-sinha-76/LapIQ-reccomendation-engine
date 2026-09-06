@@ -12,8 +12,8 @@ Coverage targets (per modified file):
 All tests use mocks only. No database. No Redis. No Gemini API.
 """
 
-from typing import AsyncIterator
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 
 from lapiq.application.orchestrator import RecommendationOrchestrator
@@ -24,13 +24,12 @@ from lapiq.domain.recommendation.models import (
     ScoredVariant,
     UserPreferences,
 )
-from lapiq.domain.recommendation.policy import RecommendationPolicy
 from lapiq.domain.recommendation.ranking import RankingEngine
-
 
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_prefs(
     budget: int = 60000,
@@ -126,6 +125,7 @@ def _make_orchestrator(
 # Regression: existing orchestrator test — now requires variant_repo arg
 # ===========================================================================
 
+
 @pytest.mark.asyncio
 async def test_orchestrator_run_recommendation_caches_result() -> None:
     """run_recommendation must store scored_variants in Redis request cache."""
@@ -186,6 +186,7 @@ async def test_orchestrator_run_recommendation_returns_result() -> None:
 # stream_for_request_id — cache miss
 # ===========================================================================
 
+
 @pytest.mark.asyncio
 async def test_stream_for_request_id_cache_miss_yields_error_message() -> None:
     """When Redis has no entry for request_id, yield a plain error string."""
@@ -205,6 +206,7 @@ async def test_stream_for_request_id_cache_miss_yields_error_message() -> None:
 # ===========================================================================
 # stream_for_request_id — all variants missing from DB after cache hit
 # ===========================================================================
+
 
 @pytest.mark.asyncio
 async def test_stream_for_request_id_all_variants_missing_uses_fallback() -> None:
@@ -266,6 +268,7 @@ async def test_stream_for_request_id_all_variants_missing_uses_fallback() -> Non
 # stream_for_request_id — partial variant loss (1 of 3 gone)
 # ===========================================================================
 
+
 @pytest.mark.asyncio
 async def test_stream_for_request_id_partial_variant_loss_rebuilds_correctly() -> None:
     """
@@ -310,9 +313,7 @@ async def test_stream_for_request_id_partial_variant_loss_rebuilds_correctly() -
     }
 
     mock_variant_repo = AsyncMock()
-    mock_variant_repo.get_by_id.side_effect = lambda vid: (
-        good_variant if vid == 11 else None
-    )
+    mock_variant_repo.get_by_id.side_effect = lambda vid: good_variant if vid == 11 else None
 
     captured_results: list[RecommendationResult] = []
 
@@ -327,7 +328,7 @@ async def test_stream_for_request_id_partial_variant_loss_rebuilds_correctly() -
     # Patch stream_explanation to capture the RecommendationResult
     orchestrator.stream_explanation = mock_stream_explanation  # type: ignore[method-assign]
 
-    chunks = [c async for c in orchestrator.stream_for_request_id("req-xyz")]
+    _ = [c async for c in orchestrator.stream_for_request_id("req-xyz")]
 
     assert len(captured_results) == 1
     rebuilt = captured_results[0]
@@ -340,6 +341,7 @@ async def test_stream_for_request_id_partial_variant_loss_rebuilds_correctly() -
 # ===========================================================================
 # stream_for_request_id — scores are restored correctly from cache
 # ===========================================================================
+
 
 @pytest.mark.asyncio
 async def test_stream_for_request_id_restores_all_score_fields() -> None:
@@ -393,6 +395,7 @@ async def test_stream_for_request_id_restores_all_score_fields() -> None:
 # ===========================================================================
 # ConfidenceScorer — immutability (frozen=True on ScoredVariant)
 # ===========================================================================
+
 
 def test_scored_variant_is_immutable() -> None:
     """ScoredVariant must be frozen — direct field assignment must raise FrozenInstanceError."""
@@ -471,6 +474,7 @@ def test_confidence_scorer_budget_zero_does_not_crash() -> None:
 # ===========================================================================
 # RankingEngine — RAM score clamp (the fixed bug)
 # ===========================================================================
+
 
 def test_ranking_engine_low_ram_produces_non_negative_value_score() -> None:
     """
@@ -625,6 +629,7 @@ def test_ranking_segment_fit_capped_at_one() -> None:
 # PostgresEvidenceRepository — normalization contract
 # ===========================================================================
 
+
 @pytest.mark.asyncio
 async def test_evidence_repository_maps_keys_correctly() -> None:
     """
@@ -632,8 +637,8 @@ async def test_evidence_repository_maps_keys_correctly() -> None:
     EvidenceAggregator.get_structured_evidence expects: source_type, summary_text,
     sentiment_score.
     """
-    from lapiq.infrastructure.database.repositories import PostgresEvidenceRepository
     from lapiq.infrastructure.database.models import ReviewEvidence
+    from lapiq.infrastructure.database.repositories import PostgresEvidenceRepository
 
     row = MagicMock(spec=ReviewEvidence)
     row.source_type = "youtube"
@@ -693,6 +698,7 @@ async def test_evidence_repository_orders_query_by_created_at_desc() -> None:
 # GeminiReasoningProvider — lazy client init, async path, exception propagation
 # ===========================================================================
 
+
 @pytest.mark.asyncio
 async def test_gemini_provider_lazy_client_initialized_only_once() -> None:
     """_get_client must initialize the genai.Client once and reuse it on repeat calls."""
@@ -702,9 +708,7 @@ async def test_gemini_provider_lazy_client_initialized_only_once() -> None:
         mock_client = MagicMock()
         mock_genai.Client.return_value = mock_client
 
-        with patch(
-            "lapiq.infrastructure.providers.gemini_provider.settings"
-        ) as mock_settings:
+        with patch("lapiq.infrastructure.providers.gemini_provider.settings") as mock_settings:
             mock_settings.gemini_api_key = "test-key"
 
             provider = GeminiReasoningProvider()
@@ -727,13 +731,9 @@ async def test_gemini_provider_uses_aio_streaming_path() -> None:
     mock_client = MagicMock()
     mock_client.aio = MagicMock()
     mock_client.aio.models = MagicMock()
-    mock_client.aio.models.generate_content_stream = AsyncMock(
-        return_value=fake_stream()
-    )
+    mock_client.aio.models.generate_content_stream = AsyncMock(return_value=fake_stream())
 
-    with patch(
-        "lapiq.infrastructure.providers.gemini_provider.settings"
-    ) as mock_settings:
+    with patch("lapiq.infrastructure.providers.gemini_provider.settings") as mock_settings:
         mock_settings.gemini_api_key = "test-key"
 
         with patch("lapiq.infrastructure.providers.gemini_provider.genai") as mock_genai:
@@ -759,9 +759,7 @@ async def test_gemini_provider_exception_propagates() -> None:
         side_effect=RuntimeError("API timeout")
     )
 
-    with patch(
-        "lapiq.infrastructure.providers.gemini_provider.settings"
-    ) as mock_settings:
+    with patch("lapiq.infrastructure.providers.gemini_provider.settings") as mock_settings:
         mock_settings.gemini_api_key = "test-key"
 
         with patch("lapiq.infrastructure.providers.gemini_provider.genai") as mock_genai:
@@ -781,20 +779,16 @@ async def test_gemini_provider_skips_empty_text_chunks() -> None:
 
     async def fake_stream(*args, **kwargs):  # type: ignore[no-untyped-def]
         yield MagicMock(text="real content")
-        yield MagicMock(text="")       # empty — must be skipped
-        yield MagicMock(text=None)     # None — must be skipped
+        yield MagicMock(text="")  # empty — must be skipped
+        yield MagicMock(text=None)  # None — must be skipped
         yield MagicMock(text="more")
 
     mock_client = MagicMock()
     mock_client.aio = MagicMock()
     mock_client.aio.models = MagicMock()
-    mock_client.aio.models.generate_content_stream = AsyncMock(
-        return_value=fake_stream()
-    )
+    mock_client.aio.models.generate_content_stream = AsyncMock(return_value=fake_stream())
 
-    with patch(
-        "lapiq.infrastructure.providers.gemini_provider.settings"
-    ) as mock_settings:
+    with patch("lapiq.infrastructure.providers.gemini_provider.settings") as mock_settings:
         mock_settings.gemini_api_key = "test-key"
 
         with patch("lapiq.infrastructure.providers.gemini_provider.genai") as mock_genai:
@@ -809,6 +803,7 @@ async def test_gemini_provider_skips_empty_text_chunks() -> None:
 # ===========================================================================
 # SSE event format — _sse_event helper
 # ===========================================================================
+
 
 def test_sse_event_format_is_correct() -> None:
     """_sse_event must produce 'data: <text>\\n\\n' format required by SSE spec."""
@@ -844,6 +839,7 @@ def test_sse_event_with_multiline_text() -> None:
 # stream_for_request_id — error chunk must NOT have SSE prefix (double-wrap audit)
 # ===========================================================================
 
+
 @pytest.mark.asyncio
 async def test_stream_for_request_id_error_chunk_has_no_sse_prefix() -> None:
     """
@@ -868,6 +864,7 @@ async def test_stream_for_request_id_error_chunk_has_no_sse_prefix() -> None:
 # Business Rules — extreme boundary & edge cases
 # ===========================================================================
 
+
 def test_business_rules_exact_five_percent_budget_buffer_boundary() -> None:
     """Variant priced at exactly 105% of budget must pass; 105.01% must be filtered out."""
     prefs = _make_prefs(budget=100000)
@@ -885,7 +882,7 @@ def test_business_rules_exact_five_percent_budget_buffer_boundary() -> None:
 
 
 def test_business_rules_empty_candidate_list() -> None:
-    """Applying business rules to an empty candidate list must return an empty list without error."""
+    """Applying business rules to an empty candidate list must return an empty list."""
     prefs = _make_prefs()
     result = BusinessRulesFilter().apply([], prefs)
     assert result == []
@@ -904,6 +901,7 @@ def test_business_rules_laptop_none_relationship() -> None:
 # ===========================================================================
 # ExplanationBuilder — edge case handling
 # ===========================================================================
+
 
 def test_explanation_builder_handles_empty_evidence_dict() -> None:
     """ExplanationBuilder.build must format prompt context gracefully when evidence is empty."""
@@ -949,6 +947,7 @@ def test_explanation_builder_fallback_handles_empty_ranked_variants() -> None:
 # CatalogService — delegation & null cases
 # ===========================================================================
 
+
 @pytest.mark.asyncio
 async def test_catalog_service_get_laptop_details_returns_none_when_missing() -> None:
     """CatalogService.get_laptop_details must return None if laptop is not found."""
@@ -969,10 +968,12 @@ async def test_catalog_service_get_laptop_details_returns_none_when_missing() ->
 # API Request Schema — Pydantic boundary validation
 # ===========================================================================
 
+
 def test_recommendation_request_pydantic_bounds() -> None:
     """RecommendationRequest must accept valid budget/RAM inputs and enforce schema limits."""
-    from lapiq.api.v1.recommendations import RecommendationRequest
     from pydantic import ValidationError
+
+    from lapiq.api.v1.recommendations import RecommendationRequest
 
     # Valid min/max bounds
     valid_req = RecommendationRequest(
@@ -1006,4 +1007,3 @@ def test_recommendation_request_pydantic_bounds() -> None:
             use_case="a",
             target_segment="Students",
         )
-

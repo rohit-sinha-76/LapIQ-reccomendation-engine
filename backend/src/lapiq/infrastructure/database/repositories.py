@@ -1,7 +1,8 @@
 """PostgreSQL implementations of domain repository interfaces using SQLAlchemy 2.x."""
 
 import logging
-from typing import Optional, Sequence
+from collections.abc import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -22,12 +23,8 @@ class PostgresLaptopRepository(LaptopRepositoryInterface):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_id(self, laptop_id: int) -> Optional[Laptop]:
-        query = (
-            select(Laptop)
-            .options(selectinload(Laptop.variants))
-            .where(Laptop.id == laptop_id)
-        )
+    async def get_by_id(self, laptop_id: int) -> Laptop | None:
+        query = select(Laptop).options(selectinload(Laptop.variants)).where(Laptop.id == laptop_id)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
@@ -56,7 +53,7 @@ class PostgresVariantRepository(VariantRepositoryInterface):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_id(self, variant_id: int) -> Optional[Variant]:
+    async def get_by_id(self, variant_id: int) -> Variant | None:
         query = (
             select(Variant)
             .options(
@@ -70,7 +67,7 @@ class PostgresVariantRepository(VariantRepositoryInterface):
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_by_sku(self, sku: str) -> Optional[Variant]:
+    async def get_by_sku(self, sku: str) -> Variant | None:
         query = (
             select(Variant)
             .options(
@@ -88,7 +85,7 @@ class PostgresVariantRepository(VariantRepositoryInterface):
         self,
         max_price: int,
         min_ram_gb: int = 8,
-        segment: Optional[str] = None,
+        segment: str | None = None,
     ) -> Sequence[Variant]:
         query = (
             select(Variant)

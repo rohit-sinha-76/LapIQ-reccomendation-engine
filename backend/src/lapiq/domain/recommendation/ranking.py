@@ -63,7 +63,6 @@ class RankingEngine:
         budget = _get_num(preferences.budget_inr, 60000.0)
         price = _get_num(getattr(variant, "current_price_inr", 50000), 50000.0)
         ram_gb = _get_num(getattr(variant, "ram_gb", 8), 8.0)
-        storage_gb = _get_num(getattr(variant, "storage_gb", 512), 512.0)
 
         if budget <= 0 or price > budget:
             price_score = 0.0

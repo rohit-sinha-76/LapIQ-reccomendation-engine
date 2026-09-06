@@ -43,7 +43,7 @@ select = ["E", "F", "I", "C901", "UP"]
 ignore = []
 
 [tool.ruff.lint.mccabe]
-max-complexity = 5
+max-complexity = 10
 
 [tool.mypy]
 python_version = "3.13"

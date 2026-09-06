@@ -1,6 +1,5 @@
 """Recommendation Engine — orchestrates candidate retrieval through to ranked output."""
 
-from typing import Sequence
 from lapiq.domain.catalog.service import CatalogService
 from lapiq.domain.recommendation.business_rules import BusinessRulesFilter
 from lapiq.domain.recommendation.confidence import ConfidenceScorer
@@ -71,8 +70,7 @@ class RecommendationEngine:
         scored.sort(key=lambda sv: sv.total_score, reverse=True)
 
         scored_with_confidence = [
-            self.confidence_scorer.compute(sv, preferences, is_partial)
-            for sv in scored
+            self.confidence_scorer.compute(sv, preferences, is_partial) for sv in scored
         ]
 
         final = self.policy.select(scored_with_confidence, top_n=top_n)

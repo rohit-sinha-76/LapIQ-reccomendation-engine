@@ -1,6 +1,7 @@
 """Integration tests for SQLAlchemy 2.x repositories with sqlite/in-memory or mock session."""
 
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
 from lapiq.infrastructure.database.repositories import (

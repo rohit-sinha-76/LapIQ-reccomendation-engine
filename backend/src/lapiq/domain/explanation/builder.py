@@ -63,7 +63,10 @@ class ExplanationBuilder:
                 lines.append(f"   - [{ev['source_type']}] {ev['summary']}")
 
         lines.append("")
-        lines.append("Explain why these laptops suit the user's stated needs. Use factual, specific language.")
+        lines.append(
+            "Explain why these laptops suit the user's stated needs. "
+            "Use factual, specific language."
+        )
 
         summary_text = "\n".join(lines)
 

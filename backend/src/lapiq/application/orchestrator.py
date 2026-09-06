@@ -2,6 +2,7 @@
 
 import logging
 import uuid
+
 from lapiq.domain.evidence.aggregator import EvidenceAggregator
 from lapiq.domain.explanation.builder import ExplanationBuilder, ExplanationContext
 from lapiq.domain.interfaces.provider import ReasoningProviderInterface

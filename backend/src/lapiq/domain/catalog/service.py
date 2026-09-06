@@ -1,6 +1,7 @@
 """Catalog Module domain service for searching and managing laptop metadata."""
 
-from typing import Optional, Sequence
+from collections.abc import Sequence
+
 from lapiq.domain.interfaces.repository import LaptopRepositoryInterface, VariantRepositoryInterface
 from lapiq.infrastructure.database.models import Laptop, Variant
 
@@ -16,7 +17,7 @@ class CatalogService:
         self.laptop_repo = laptop_repo
         self.variant_repo = variant_repo
 
-    async def get_laptop_details(self, laptop_id: int) -> Optional[Laptop]:
+    async def get_laptop_details(self, laptop_id: int) -> Laptop | None:
         """Get laptop details including all variants."""
         return await self.laptop_repo.get_by_id(laptop_id)
 
@@ -24,7 +25,7 @@ class CatalogService:
         self,
         max_budget_inr: int,
         min_ram_gb: int = 8,
-        target_segment: Optional[str] = None,
+        target_segment: str | None = None,
     ) -> Sequence[Variant]:
         """Search variants matching budget and segment criteria."""
         return await self.variant_repo.get_candidates(

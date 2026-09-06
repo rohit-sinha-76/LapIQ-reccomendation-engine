@@ -1,6 +1,7 @@
 """Unit tests for core health check functionality."""
 
 import pytest
+
 from lapiq.api.v1.router import health_check
 
 

@@ -1,7 +1,7 @@
 """SQLAlchemy 2.x ORM models for LapIQ database schema."""
 
 from datetime import datetime
-from typing import Optional
+
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -65,7 +65,7 @@ class Laptop(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     brand: Mapped[str] = mapped_column(String(100), nullable=False)
     model_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    series: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    series: Mapped[str | None] = mapped_column(String(100), nullable=True)
     target_segment: Mapped[str] = mapped_column(String(50), nullable=False)
     is_available: Mapped[bool] = mapped_column(nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -93,7 +93,7 @@ class Variant(Base):
     os_type: Mapped[str] = mapped_column(String(50), nullable=False, default="Windows 11")
     current_price_inr: Mapped[int] = mapped_column(Integer, nullable=False)
     is_in_stock: Mapped[bool] = mapped_column(nullable=False, default=True)
-    embedding: Mapped[Optional[list[float]]] = mapped_column(Vector(1536), nullable=True)
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(1536), nullable=True)
 
     laptop: Mapped["Laptop"] = relationship("Laptop", back_populates="variants")
     cpu: Mapped["CPU"] = relationship("CPU")
@@ -111,7 +111,9 @@ class PriceSnapshot(Base):
     variant_id: Mapped[int] = mapped_column(Integer, ForeignKey("variants.id"), nullable=False)
     price_inr: Mapped[int] = mapped_column(Integer, nullable=False)
     seller_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    recorded_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
     variant: Mapped["Variant"] = relationship("Variant", back_populates="prices")
 
@@ -124,7 +126,7 @@ class ReviewEvidence(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     laptop_id: Mapped[int] = mapped_column(Integer, ForeignKey("laptops.id"), nullable=False)
     source_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    source_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    source_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     summary_text: Mapped[str] = mapped_column(Text, nullable=False)
     sentiment_score: Mapped[float] = mapped_column(Numeric(3, 2), nullable=False, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

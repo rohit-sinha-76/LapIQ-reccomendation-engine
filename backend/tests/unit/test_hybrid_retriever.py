@@ -1,6 +1,7 @@
 """Unit tests for HybridRetriever."""
 
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
 from lapiq.application.retriever import HybridRetriever
@@ -12,7 +13,7 @@ async def test_hybrid_retriever_returns_max_candidates() -> None:
     """HybridRetriever must execute SQL query and return scalars result."""
     mock_session = AsyncMock()
     mock_result = MagicMock()
-    
+
     variant1 = MagicMock()
     variant1.id = 1
     variant2 = MagicMock()

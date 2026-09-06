@@ -1,8 +1,6 @@
 """Unit tests for the deterministic Recommendation Engine pipeline components."""
 
-from typing import Optional
-from unittest.mock import AsyncMock, MagicMock
-import pytest
+from unittest.mock import MagicMock
 
 from lapiq.domain.recommendation.business_rules import BusinessRulesFilter
 from lapiq.domain.recommendation.confidence import ConfidenceScorer
@@ -10,10 +8,10 @@ from lapiq.domain.recommendation.models import ScoredVariant, UserPreferences
 from lapiq.domain.recommendation.policy import RecommendationPolicy
 from lapiq.domain.recommendation.ranking import RankingEngine
 
-
 # ---------------------------------------------------------------------------
 # Helpers: build minimal fake ORM objects without hitting the database
 # ---------------------------------------------------------------------------
+
 
 def _make_cpu(benchmark: int = 15000) -> MagicMock:
     cpu = MagicMock()
@@ -66,6 +64,7 @@ def _make_variant(
 # Business Rules Tests
 # ---------------------------------------------------------------------------
 
+
 def test_business_rules_filters_out_of_stock() -> None:
     """Variants marked out of stock must be excluded."""
     prefs = UserPreferences(budget_inr=60000, use_case="study", target_segment="Students")
@@ -107,10 +106,12 @@ def test_business_rules_rejects_over_budget_with_buffer() -> None:
 # Ranking Engine Tests
 # ---------------------------------------------------------------------------
 
+
 def test_ranking_engine_scores_within_range() -> None:
     """All score components must be in [0.0, 1.0] and total in [0.0, 1.0]."""
-    prefs = UserPreferences(budget_inr=80000, use_case="gaming", target_segment="Gamers",
-                            requires_dedicated_gpu=True)
+    prefs = UserPreferences(
+        budget_inr=80000, use_case="gaming", target_segment="Gamers", requires_dedicated_gpu=True
+    )
     variant = _make_variant(price=70000, ram_gb=16, cpu_benchmark=20000, gpu_benchmark=18000)
 
     scored = RankingEngine().score(variant, prefs)
@@ -136,6 +137,7 @@ def test_ranking_engine_higher_benchmark_gives_higher_performance_score() -> Non
 # ---------------------------------------------------------------------------
 # Confidence Scorer Tests
 # ---------------------------------------------------------------------------
+
 
 def test_confidence_scorer_partial_results_penalty() -> None:
     """Partial result flag must reduce confidence by PENALTY_PARTIAL_RESULTS."""
@@ -164,6 +166,7 @@ def test_confidence_scorer_minimum_floor() -> None:
 # ---------------------------------------------------------------------------
 # Recommendation Policy Tests
 # ---------------------------------------------------------------------------
+
 
 def test_recommendation_policy_limits_to_top_n() -> None:
     """Policy must return at most top_n candidates."""

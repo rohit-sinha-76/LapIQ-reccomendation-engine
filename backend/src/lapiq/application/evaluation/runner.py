@@ -1,7 +1,7 @@
 """Evaluation Runner — offline standalone persona accuracy benchmark framework."""
 
 import logging
-from typing import Any, Sequence
+from typing import Any
 
 from lapiq.application.evaluation.metrics import AccuracyMetrics
 from lapiq.domain.recommendation.engine import RecommendationEngine
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class EvaluationRunner:
     """
     Offline evaluation framework executing persona test suites.
-    
+
     Measures Top-1 and Top-3 accuracy metrics on predefined persona profiles.
     Runs the pure deterministic engine with zero DB, Redis, or LLM network calls.
     """
@@ -75,14 +75,16 @@ class EvaluationRunner:
             if is_top3_match:
                 top3_correct += 1
 
-            persona_results.append({
-                "persona_id": persona_id,
-                "persona_name": str(p.get("name", persona_id)),
-                "top1_match": is_top1_match,
-                "top3_match": is_top3_match,
-                "actual_top1": actual_top1_sku,
-                "expected_top1": expected_top1_sku,
-            })
+            persona_results.append(
+                {
+                    "persona_id": persona_id,
+                    "persona_name": str(p.get("name", persona_id)),
+                    "top1_match": is_top1_match,
+                    "top3_match": is_top3_match,
+                    "actual_top1": actual_top1_sku,
+                    "expected_top1": expected_top1_sku,
+                }
+            )
 
         top1_pct = round((top1_correct / total * 100.0) if total > 0 else 0.0, 2)
         top3_pct = round((top3_correct / total * 100.0) if total > 0 else 0.0, 2)

@@ -1,9 +1,9 @@
 """Business Rules — availability, budget, and discontinued laptop filtering."""
 
-from typing import Sequence
+from collections.abc import Sequence
+
 from lapiq.domain.recommendation.models import UserPreferences
 from lapiq.infrastructure.database.models import Variant
-
 
 MAX_PRICE_BUFFER_PERCENT = 0.05  # Allow up to 5% over stated budget
 

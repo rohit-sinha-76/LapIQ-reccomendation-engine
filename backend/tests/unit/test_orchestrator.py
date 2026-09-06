@@ -1,6 +1,7 @@
 """Unit tests for RecommendationEngine orchestrator and execution flow."""
 
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
 from lapiq.application.orchestrator import RecommendationOrchestrator

@@ -1,6 +1,7 @@
 """Unit tests for CatalogService, PricingService, and worker jobs."""
 
 from unittest.mock import AsyncMock
+
 import pytest
 
 from lapiq.domain.catalog.service import CatalogService
@@ -16,7 +17,9 @@ async def test_catalog_service_find_candidates() -> None:
     mock_variant_repo.get_candidates.return_value = []
 
     service = CatalogService(laptop_repo=mock_laptop_repo, variant_repo=mock_variant_repo)
-    candidates = await service.find_candidates_for_budget(max_budget_inr=60000, target_segment="Students")
+    candidates = await service.find_candidates_for_budget(
+        max_budget_inr=60000, target_segment="Students"
+    )
 
     assert candidates == []
     mock_variant_repo.get_candidates.assert_called_once_with(

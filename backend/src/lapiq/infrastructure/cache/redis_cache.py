@@ -1,8 +1,10 @@
 """Redis async cache client wrapper implementing invalidation strategies."""
 
 import json
-from typing import Any, Optional
+from typing import Any
+
 import redis.asyncio as aioredis
+
 from lapiq.core.config import settings
 
 
@@ -19,9 +21,9 @@ class RedisCacheManager:
     NOTE: Recommendation engine output is NEVER cached in Redis.
     """
 
-    def __init__(self, redis_url: Optional[str] = None) -> None:
+    def __init__(self, redis_url: str | None = None) -> None:
         self.redis_url = redis_url or settings.redis_url
-        self._client: Optional[aioredis.Redis] = None
+        self._client: aioredis.Redis | None = None
 
     async def get_client(self) -> aioredis.Redis:
         """Get or initialize async Redis client connection."""
@@ -29,7 +31,7 @@ class RedisCacheManager:
             self._client = aioredis.from_url(self.redis_url, decode_responses=True)
         return self._client
 
-    async def set_json(self, key: str, value: Any, ttl_seconds: Optional[int] = None) -> None:
+    async def set_json(self, key: str, value: Any, ttl_seconds: int | None = None) -> None:
         """Set JSON payload in Redis with optional TTL."""
         client = await self.get_client()
         serialized = json.dumps(value)
@@ -38,7 +40,7 @@ class RedisCacheManager:
         else:
             await client.set(key, serialized)
 
-    async def get_json(self, key: str) -> Optional[Any]:
+    async def get_json(self, key: str) -> Any | None:
         """Retrieve and parse JSON payload from Redis."""
         client = await self.get_client()
         data = await client.get(key)

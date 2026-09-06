@@ -1,7 +1,7 @@
 """Domain data structures for the Recommendation Engine pipeline."""
 
 from dataclasses import dataclass, field
-from typing import Optional
+
 from lapiq.infrastructure.database.models import Variant
 
 
@@ -14,10 +14,10 @@ class UserPreferences:
     target_segment: str
     min_ram_gb: int = 8
     min_storage_gb: int = 256
-    preferred_brand: Optional[str] = None
+    preferred_brand: str | None = None
     requires_dedicated_gpu: bool = False
     prefers_lightweight: bool = False
-    gaming_level: Optional[str] = None
+    gaming_level: str | None = None
 
 
 @dataclass(frozen=True)

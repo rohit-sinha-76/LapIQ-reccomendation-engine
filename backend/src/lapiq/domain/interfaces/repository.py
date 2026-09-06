@@ -1,15 +1,16 @@
 """Abstract base classes defining repository interfaces for domain entities."""
 
 from abc import ABC, abstractmethod
-from typing import Optional, Sequence
-from lapiq.infrastructure.database.models import CPU, GPU, Display, Laptop, PriceSnapshot, Variant
+from collections.abc import Sequence
+
+from lapiq.infrastructure.database.models import Laptop, PriceSnapshot, Variant
 
 
 class LaptopRepositoryInterface(ABC):
     """Abstract interface for Laptop entity data access."""
 
     @abstractmethod
-    async def get_by_id(self, laptop_id: int) -> Optional[Laptop]:
+    async def get_by_id(self, laptop_id: int) -> Laptop | None:
         """Retrieve laptop entity by primary key."""
         pass
 
@@ -28,12 +29,12 @@ class VariantRepositoryInterface(ABC):
     """Abstract interface for Variant entity data access."""
 
     @abstractmethod
-    async def get_by_id(self, variant_id: int) -> Optional[Variant]:
+    async def get_by_id(self, variant_id: int) -> Variant | None:
         """Retrieve variant by primary key."""
         pass
 
     @abstractmethod
-    async def get_by_sku(self, sku: str) -> Optional[Variant]:
+    async def get_by_sku(self, sku: str) -> Variant | None:
         """Retrieve variant by unique SKU string."""
         pass
 
@@ -42,7 +43,7 @@ class VariantRepositoryInterface(ABC):
         self,
         max_price: int,
         min_ram_gb: int = 8,
-        segment: Optional[str] = None,
+        segment: str | None = None,
     ) -> Sequence[Variant]:
         """Filter variant candidates matching budget and minimum specification criteria."""
         pass
@@ -52,7 +53,7 @@ class PriceRepositoryInterface(ABC):
     """Abstract interface for PriceSnapshot entity data access."""
 
     @abstractmethod
-    async def get_latest_price(self, variant_id: int) -> Optional[PriceSnapshot]:
+    async def get_latest_price(self, variant_id: int) -> PriceSnapshot | None:
         """Retrieve the most recent price snapshot for a given variant."""
         pass
 

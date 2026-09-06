@@ -1,6 +1,7 @@
 """API v1 router definitions."""
 
 from fastapi import APIRouter
+
 from lapiq.api.v1.recommendations import recommend_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
