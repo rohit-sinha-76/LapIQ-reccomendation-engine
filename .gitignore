@@ -79,3 +79,7 @@ Thumbs.db
 # Antigravity & Agent Temp Files
 .antigravity/
 .gemini/
+
+# College / University Submission Docs & Scripts (Private)
+*.docx
+scripts/generate_ieee_synopsis.py
