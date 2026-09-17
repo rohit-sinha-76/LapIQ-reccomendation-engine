@@ -137,10 +137,10 @@ export default function ComparePage() {
                 {BENCHMARK_LAPTOPS.map((laptop) => (
                   <td key={laptop.variant_id} style={{ padding: 'var(--space-md)' }}>
                     <span style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                      ₹{laptop.price_inr.toLocaleString('en-IN')}
+                      ₹{(laptop.price_inr ?? 0).toLocaleString('en-IN')}
                     </span>
                     <span style={{ marginLeft: '8px', fontSize: '0.8125rem', color: 'var(--color-success)', fontWeight: 600 }}>
-                      {laptop.max_discount_percentage}% off MRP
+                      {laptop.max_discount_percentage ?? 0}% off MRP
                     </span>
                   </td>
                 ))}
@@ -188,7 +188,7 @@ export default function ComparePage() {
                   <td key={laptop.variant_id} style={{ padding: 'var(--space-md)' }}>
                     <Badge variant="success">
                       <CheckCircle2 size={12} style={{ marginRight: '4px' }} />
-                      {Math.round(laptop.confidence_score * 100)}% Confidence
+                      {Math.round((laptop.confidence_score ?? 1) * 100)}% Confidence
                     </Badge>
                   </td>
                 ))}

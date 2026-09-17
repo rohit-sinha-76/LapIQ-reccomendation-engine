@@ -1,5 +1,3 @@
-"""API v1 endpoints integration tests using httpx.AsyncClient."""
-
 import pytest
 from httpx import ASGITransport, AsyncClient
 

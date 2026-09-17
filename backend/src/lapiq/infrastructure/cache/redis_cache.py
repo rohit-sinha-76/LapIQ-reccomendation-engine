@@ -1,11 +1,15 @@
 """Redis async cache client wrapper implementing invalidation strategies."""
 
 import json
+import logging
 from typing import Any
 
 import redis.asyncio as aioredis
+from redis.exceptions import RedisError
 
 from lapiq.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class RedisCacheManager:
@@ -32,32 +36,46 @@ class RedisCacheManager:
         return self._client
 
     async def set_json(self, key: str, value: Any, ttl_seconds: int | None = None) -> None:
-        """Set JSON payload in Redis with optional TTL."""
-        client = await self.get_client()
-        serialized = json.dumps(value)
-        if ttl_seconds:
-            await client.setex(key, ttl_seconds, serialized)
-        else:
-            await client.set(key, serialized)
+        """Set JSON payload in Redis with optional TTL and graceful failure."""
+        try:
+            client = await self.get_client()
+            serialized = json.dumps(value)
+            if ttl_seconds:
+                await client.setex(key, ttl_seconds, serialized)
+            else:
+                await client.set(key, serialized)
+        except (RedisError, OSError) as exc:
+            logger.warning("Redis cache write failed for key '%s': %s", key, exc)
 
     async def get_json(self, key: str) -> Any | None:
-        """Retrieve and parse JSON payload from Redis."""
-        client = await self.get_client()
-        data = await client.get(key)
-        if data is None:
+        """Retrieve and parse JSON payload from Redis with graceful failure."""
+        try:
+            client = await self.get_client()
+            data = await client.get(key)
+            if data is None:
+                return None
+            return json.loads(data)
+        except (RedisError, OSError) as exc:
+            logger.warning("Redis cache read failed for key '%s': %s", key, exc)
             return None
-        return json.loads(data)
 
     async def invalidate(self, pattern: str) -> int:
         """Invalidate keys matching pattern (used by worker price update events)."""
-        client = await self.get_client()
-        keys = await client.keys(pattern)
-        if keys:
-            return await client.delete(*keys)
-        return 0
+        try:
+            client = await self.get_client()
+            keys = await client.keys(pattern)
+            if keys:
+                return await client.delete(*keys)
+            return 0
+        except (RedisError, OSError) as exc:
+            logger.warning("Redis cache invalidation failed for pattern '%s': %s", pattern, exc)
+            return 0
 
     async def close(self) -> None:
         """Close Redis client connection."""
         if self._client:
-            await self._client.close()
+            try:
+                await self._client.close()
+            except (RedisError, OSError):
+                pass
             self._client = None

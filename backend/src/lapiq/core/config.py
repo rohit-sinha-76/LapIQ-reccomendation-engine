@@ -1,6 +1,6 @@
 """Application configuration settings using Pydantic BaseSettings."""
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -16,7 +16,8 @@ class Settings(BaseSettings):
     environment: str = Field(default="development", description="Execution environment")
     log_level: str = Field(default="INFO", description="Logging level")
     secret_key: str = Field(
-        description="Application secret key — must be set via environment variable. No default.",
+        default="lapiq-dev-secret-key-minimum-32-chars-length",
+        description="Application secret key — override via environment variable in production.",
     )
 
     # Database
@@ -39,6 +40,15 @@ class Settings(BaseSettings):
         default=["http://localhost:3000", "http://127.0.0.1:3000"],
         description="Allowed CORS origins",
     )
+
+    @model_validator(mode="after")
+    def validate_production_security(self) -> "Settings":
+        if self.environment.lower() == "production":
+            if not self.secret_key or "dev-secret-key" in self.secret_key:
+                raise ValueError(
+                    "SECRET_KEY must be set to a secure, non-default value in production."
+                )
+        return self
 
 
 settings = Settings()
